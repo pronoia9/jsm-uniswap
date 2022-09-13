@@ -12,7 +12,7 @@ const WalletButton = () => {
   
   useEffect(() => {
     if (ens) setAccountAddress(ens);
-    else if (account) setAccountAddress(`(${shortenAddress(account).split('...')[0]}) Disconnect`);
+    else if (account) setAccountAddress(`(${shortenAddress(account).split('...')[0]}) Sign Out`);
     else setAccountAddress('');
   }, [account, ens, setAccountAddress]);
 
