@@ -7,7 +7,16 @@ import { ethers } from 'ethers';
 import { parseUnits } from 'ethers/lib/utils';
 
 import { ROUTER_ADDRESS } from '../config';
-import { AmountIn, AmountOut, Balance } from '../components';
+import { AmountIn, AmountOut, Balance } from './';
+import styles from '../styles';
+import {
+  getAvailableTokens,
+  getCounterpartTokens,
+  findPoolByTokens,
+  isOperationPending,
+  getFailureMessage,
+  getSuccessMessage,
+} from '../utils';
 
 const Exchange = ({ pools }) => {
   return (
