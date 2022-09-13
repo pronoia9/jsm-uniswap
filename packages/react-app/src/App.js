@@ -4,13 +4,11 @@ import { useEthers } from '@usedapp/core';
 import styles from './styles';
 import { uniswapLogo } from './assets';
 import { Exchange, Loader, WalletButton } from './components';
+import { usePools } from './hooks';
 
 const App = () => {
   const { account } = useEthers();
-  console.log(account);
-
-  // !Temp
-  const poolsLoading = false;
+  const { loading, pools } = usePools();
 
   return (
     <div className={styles.container}>
@@ -32,10 +30,10 @@ const App = () => {
               <div className={styles.exchange}>
                 {/* Check if theres a connected metamask account */}
                 {account ? (
-                  poolsLoading ? (
+                  loading ? (
                     <Loader title='Loading pools, please wait.' />
                   ) : (
-                    <Exchange />
+                    <Exchange pools={pools} />
                   )
                 ) : (
                   <Loader title='Please connect your wallet.' />
