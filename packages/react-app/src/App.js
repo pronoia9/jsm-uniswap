@@ -31,7 +31,15 @@ const App = () => {
               <div className='pink_gradient' />
               <div className={styles.exchange}>
                 {/* Check if theres a connected metamask account */}
-                {account ? poolsLoading ? <Loader /> : <Exchange /> : <Loader />}
+                {account ? (
+                  poolsLoading ? (
+                    <Loader title='Loading pools, please wait.' />
+                  ) : (
+                    <Exchange />
+                  )
+                ) : (
+                  <Loader title='Please connect your wallet.' />
+                )}
               </div>
               <div className='blue_gradient' />
             </div>
