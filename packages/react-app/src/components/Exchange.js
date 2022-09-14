@@ -35,7 +35,7 @@ const Exchange = ({ pools }) => {
   const fromTokenBalance = useTokenBalance(fromToken, account);
   const toTokenBalance = useTokenBalance(toToken, account);
   const tokenAllowance = useTokenAllowance(fromToken, account, ROUTER_ADDRESS) || parseUnits('0');
-  const approveNeeded = fromValueBigNumber.gt(tokenAllowance);
+  const approvedNeeded = fromValueBigNumber.gt(tokenAllowance);
   const formValueIsGreaterThan0 = fromValueBigNumber.gt(parseUnits('0'));
   const hasEnoughBalance = fromValueBigNumber.lte(fromTokenBalance ?? parseUnits('0'));
 
@@ -55,8 +55,8 @@ const Exchange = ({ pools }) => {
 
   const isApproving = isOperationPending(swapApprovedState),
     isSwapping = isOperationPending(swapExecuteState);
-  const canApprove = !isApproving && approveNeeded,
-    canSwap = !approveNeeded && !isSwapping && formValueIsGreaterThan0 && hasEnoughBalance;
+  const canApprove = !isApproving && approvedNeeded,
+    canSwap = !approvedNeeded && !isSwapping && formValueIsGreaterThan0 && hasEnoughBalance;
 
   const successMessage = getSuccessMessage(swapApprovedState, swapExecuteState),
     failureMessage = getFailureMessage(swapApprovedState, swapExecuteState);
@@ -74,8 +74,11 @@ const Exchange = ({ pools }) => {
   };
 
   const onSwapRequested = () => {
-    swapAExecuteSend(fromValueBigNumber, 0, [fromToken, toToken], account, Math.floor(Date.now() / 1000) + 60 * 2)
-      .then(() => { setFromValue('0'); });
+    swapAExecuteSend(fromValueBigNumber, 0, [fromToken, toToken], account, Math.floor(Date.now() / 1000) + 60 * 2).then(
+      () => {
+        setFromValue('0');
+      }
+    );
   };
 
   const onFromValueChange = (value) => {
@@ -90,7 +93,7 @@ const Exchange = ({ pools }) => {
 
   const onFromTokenChange = (value) => {
     setFromToken(value);
-  }
+  };
 
   const onToTokenChange = (value) => {
     setToToken(value);
@@ -102,44 +105,61 @@ const Exchange = ({ pools }) => {
         setResetState(true);
         setFromValue('0');
         setToToken('');
-      }, 5000)
+      }, 5000);
     }
-  }, [failureMessage, successMessage])
-  
+  }, [failureMessage, successMessage]);
 
   return (
     <div className='flex flex-col w-full items-center'>
       <div className='mb-8'>
-        <AmountIn />
-        <Balance />
-      </div>
-      <div className='mb-8 w-[100%]'>
-        <AmountOut />
-        <Balance />
+        <AmountIn
+          value={fromValue}
+          onChange={onFromValueChange}
+          currencyValue={fromToken}
+          onSelect={onFromTokenChange}
+          currencies={availableTokens}
+          isSwapping={isSwapping && hasEnoughBalance}
+        />
+        <Balance tokenBalance={fromTokenBalance} />
       </div>
 
-      {'approveNeeded' && '!isSwapping' ? (
+      <div className='mb-8 w-[100%]'>
+        <AmountOut
+          fromToken={fromToken}
+          toToken={toToken}
+          amountIn={fromValueBigNumber}
+          pairContract={pairAddress}
+          currencyValue={toToken}
+          onSelect={onToTokenChange}
+          currencies={counterpartTokens}
+        />
+        <Balance tokenBalance={toTokenBalance} />
+      </div>
+
+      {approvedNeeded && !isSwapping ? (
         <button
-          disabled={!'canApprove'}
-          onClick={() => {}}
-          className={`${'canApprove' ? 'bg-site-pink text-white' : 'bg-site-dim2 text-site-dim2'} ${
+          disabled={!canApprove}
+          onClick={onApproveRequested}
+          className={`${canApprove ? 'bg-site-pink text-white' : 'bg-site-dim2 text-site-dim2'} ${
             styles.actionButton
           }`}>
-          {'isApproving' ? 'Approving' : 'Approve'}
+          {isApproving ? 'Approving...' : 'Approve'}
         </button>
       ) : (
         <button
-          disabled={!'canSwap'}
-          onClick={() => {}}
-          className={`${'canSwap' ? 'bg-site-pink text-white' : 'bg-site-dim2 text-site-dim2'} ${styles.actionButton}`}>
-          {'isSwapping' ? 'Swapping...' : 'hasEnoughBalance'}
+          disabled={!canSwap}
+          onClick={onSwapRequested}
+          className={`${canSwap ? 'bg-site-pink text-white' : 'bg-site-dim2 text-site-dim2'} ${styles.actionButton}`}>
+          {isSwapping ? 'Swapping...' : hasEnoughBalance ? 'Swap' : 'Insufficient balance'}
         </button>
       )}
 
-      {'failureMessage' && '!resetState' ? (
-        <p className={styles.message}>failure</p>
+      {failureMessage && !resetState ? (
+        <p className={styles.message}>{failureMessage}</p>
+      ) : successMessage ? (
+        <p className={styles.message}>{successMessage}</p>
       ) : (
-        <p className={styles.message}>success</p>
+        ''
       )}
     </div>
   );
