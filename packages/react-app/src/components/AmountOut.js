@@ -5,7 +5,7 @@ import { chevronDown } from '../assets';
 import styles from '../styles';
 import { useOnClickOutside } from '../utils';
 
-const AmountOut = () => {
+const AmountOut = ({ fromToken, toToken, amountIn, pairContract, currencyValue, onSelect, currencies }) => {
   const [showList, setShowList] = useState(false);
 
   return (
