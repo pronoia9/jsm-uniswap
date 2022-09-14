@@ -5,7 +5,7 @@ import { chevronDown } from '../assets';
 import styles from '../styles';
 import { useOnClickOutside } from '../utils';
 
-const AmountIn = ({ value, onChnage, currencyValue, onSelect, currencies, isSwapping }) => {
+const AmountIn = ({ value, onChange, currencyValue, onSelect, currencies, isSwapping }) => {
   const [showList, setShowList] = useState(false);
   const [activeCurrency, setActiveCurrency] = useState('Select');
   const ref = useRef();
@@ -24,7 +24,7 @@ const AmountIn = ({ value, onChnage, currencyValue, onSelect, currencies, isSwap
         type='number'
         value={value}
         disabled={isSwapping}
-        onChange={(e) => typeof onChnage === 'function' && onChnage(e.target.value)}
+        onChange={(e) => typeof onChange === 'function' && onChange(e.target.value)}
         className={styles.amountInput}
       />
 
@@ -37,7 +37,7 @@ const AmountIn = ({ value, onChnage, currencyValue, onSelect, currencies, isSwap
           {activeCurrency}
           <img
             src={chevronDown}
-            alt='chevron-down'
+            alt='cheveron-down'
             className={`w-3 h-3 object-contain ml-2 ${showList ? 'rotate-180' : 'rotate-0'}`}
           />
         </button>
@@ -51,7 +51,7 @@ const AmountIn = ({ value, onChnage, currencyValue, onSelect, currencies, isSwap
                   activeCurrency === tokenName ? ' bg-site-dim2' : ''
                 } cursor-pointer`}
                 onClick={() => {
-                  if (typeof onSelect === 'function' && onSelect(token));
+                  if (typeof onSelect === 'function') onSelect(token);
                   setActiveCurrency(tokenName);
                   setShowList(false);
                 }}>
