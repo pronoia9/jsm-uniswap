@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Contract } from '@ethersproject/contracts';
 import { abis } from '@my-app/contracts';
 import { ERC20, useContractFunction, useEthers, useTokenAllowance, useTokenBalance } from '@usedapp/core';
@@ -24,13 +24,11 @@ const Exchange = ({ pools }) => {
   const [fromToken, setFromToken] = useState(pools[0].token0Address);
   const [toToken, setToToken] = useState('');
   const [resetState, setResetState] = useState(false);
-  console.log('ONE', { account, fromValue, fromToken, toToken, resetState });
 
   const fromValueBigNumber = parseUnits(fromValue);
   const availableTokens = getAvailableTokens(pools);
   const counterpartTokens = getCounterpartTokens(pools, fromToken);
   const pairAddress = findPoolByTokens(pools, fromToken, toToken)?.address ?? '';
-  console.log('TWO', { fromValueBigNumber, availableTokens, counterpartTokens, pairAddress });
 
   const routerContract = new Contract(ROUTER_ADDRESS, abis.router02);
   const fromTokenContract = new Contract(fromToken, ERC20.abi);
@@ -40,31 +38,74 @@ const Exchange = ({ pools }) => {
   const approveNeeded = fromValueBigNumber.gt(tokenAllowance);
   const formValueIsGreaterThan0 = fromValueBigNumber.gt(parseUnits('0'));
   const hasEnoughBalance = fromValueBigNumber.lte(fromTokenBalance ?? parseUnits('0'));
-  console.log('THREE', { routerContract, fromTokenContract, fromTokenBalance, toTokenBalance, tokenAllowance, approveNeeded, formValueIsGreaterThan0, hasEnoughBalance, });
 
   const { state: swapApprovedState, send: swapApprovedSend } = useContractFunction(fromTokenContract, 'approve', {
     transactionName: 'onApproveRequested',
     gasLimitBufferPercentage: 10,
   });
-  console.log('FOUR', { swapApprovedState, swapApprovedSend });
 
   const { state: swapExecuteState, send: swapAExecuteSend } = useContractFunction(
-    routerContract, 'swapExactTokensForTokens', {
+    routerContract,
+    'swapExactTokensForTokens',
+    {
       transactionName: 'swapExactTokensForTokens',
       gasLimitBufferPercentage: 10,
     }
   );
-  console.log('FIVE', { swapExecuteState, swapAExecuteSend });
-  
+
   const isApproving = isOperationPending(swapApprovedState),
-  isSwapping = isOperationPending(swapExecuteState);
+    isSwapping = isOperationPending(swapExecuteState);
   const canApprove = !isApproving && approveNeeded,
-  canSwap = !approveNeeded && !isSwapping && formValueIsGreaterThan0 && hasEnoughBalance;
-  console.log('SIX', { isApproving, isSwapping, canApprove, canSwap });
-  
+    canSwap = !approveNeeded && !isSwapping && formValueIsGreaterThan0 && hasEnoughBalance;
+
   const successMessage = getSuccessMessage(swapApprovedState, swapExecuteState),
-  failureMessage = getFailureMessage(swapApprovedState, swapExecuteState);
-  console.log('SEVEN', { successMessage, failureMessage });
+    failureMessage = getFailureMessage(swapApprovedState, swapExecuteState);
+
+  // console.log('ONE', { account, fromValue, fromToken, toToken, resetState });
+  // console.log('TWO', { fromValueBigNumber, availableTokens, counterpartTokens, pairAddress });
+  // console.log('THREE', { routerContract, fromTokenContract, fromTokenBalance, toTokenBalance, tokenAllowance, approveNeeded, formValueIsGreaterThan0, hasEnoughBalance, });
+  // console.log('FOUR', { swapApprovedState, swapApprovedSend });
+  // console.log('FIVE', { swapExecuteState, swapAExecuteSend });
+  // console.log('SIX', { isApproving, isSwapping, canApprove, canSwap });
+  // console.log('SEVEN', { successMessage, failureMessage });
+
+  const onApproveRequested = () => {
+    swapApprovedSend(ROUTER_ADDRESS, ethers.constants.MaxInt256);
+  };
+
+  const onSwapRequested = () => {
+    swapAExecuteSend(fromValueBigNumber, 0, [fromToken, toToken], account, Math.floor(Date.now() / 1000) + 60 * 2)
+      .then(() => { setFromValue('0'); });
+  };
+
+  const onFromValueChange = (value) => {
+    const trimmedValue = value.trim();
+    try {
+      if (trimmedValue) parseUnits(value);
+      setFromValue(value);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onFromTokenChange = (value) => {
+    setFromToken(value);
+  }
+
+  const onToTokenChange = (value) => {
+    setToToken(value);
+  };
+
+  useEffect(() => {
+    if (failureMessage || successMessage) {
+      setTimeout(() => {
+        setResetState(true);
+        setFromValue('0');
+        setToToken('');
+      }, 5000)
+    }
+  }, [failureMessage, successMessage])
+  
 
   return (
     <div className='flex flex-col w-full items-center'>
