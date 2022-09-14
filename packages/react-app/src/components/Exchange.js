@@ -24,11 +24,13 @@ const Exchange = ({ pools }) => {
   const [fromToken, setFromToken] = useState(pools[0].token0Address);
   const [toToken, setToToken] = useState('');
   const [resetState, setResetState] = useState(false);
+  console.log('ONE', { account, fromValue, fromToken, toToken, resetState });
 
   const fromValueBigNumber = parseUnits(fromValue);
   const availableTokens = getAvailableTokens(pools);
   const counterpartTokens = getCounterpartTokens(pools, fromToken);
   const pairAddress = findPoolByTokens(pools, fromToken, toToken)?.address ?? '';
+  console.log('TWO', { fromValueBigNumber, availableTokens, counterpartTokens, pairAddress });
 
   const routerContract = new Contract(ROUTER_ADDRESS, abis.router02);
   const fromTokenContract = new Contract(fromToken, ERC20.abi);
@@ -38,12 +40,31 @@ const Exchange = ({ pools }) => {
   const approveNeeded = fromValueBigNumber.gt(tokenAllowance);
   const formValueIsGreaterThan0 = fromValueBigNumber.gt(parseUnits('0'));
   const hasEnoughBalance = fromValueBigNumber.lte(fromTokenBalance ?? parseUnits('0'));
+  console.log('THREE', { routerContract, fromTokenContract, fromTokenBalance, toTokenBalance, tokenAllowance, approveNeeded, formValueIsGreaterThan0, hasEnoughBalance, });
 
-  // !temp
-  // const isApproving = isOperationPending('approve'), // TODO
-  //   isSwapping = isOperationPending('swap'); // TODO
-  // const successMessage = getSuccessMessage(), // TODO
-  //   failure = getFailureMessage(); // TODO
+  const { state: swapApprovedState, send: swapApprovedSend } = useContractFunction(fromTokenContract, 'approve', {
+    transactionName: 'onApproveRequested',
+    gasLimitBufferPercentage: 10,
+  });
+  console.log('FOUR', { swapApprovedState, swapApprovedSend });
+
+  const { state: swapExecuteState, send: swapAExecuteSend } = useContractFunction(
+    routerContract, 'swapExactTokensForTokens', {
+      transactionName: 'swapExactTokensForTokens',
+      gasLimitBufferPercentage: 10,
+    }
+  );
+  console.log('FIVE', { swapExecuteState, swapAExecuteSend });
+  
+  const isApproving = isOperationPending(swapApprovedState),
+  isSwapping = isOperationPending(swapExecuteState);
+  const canApprove = !isApproving && approveNeeded,
+  canSwap = !approveNeeded && !isSwapping && formValueIsGreaterThan0 && hasEnoughBalance;
+  console.log('SIX', { isApproving, isSwapping, canApprove, canSwap });
+  
+  const successMessage = getSuccessMessage(swapApprovedState, swapExecuteState),
+  failureMessage = getFailureMessage(swapApprovedState, swapExecuteState);
+  console.log('SEVEN', { successMessage, failureMessage });
 
   return (
     <div className='flex flex-col w-full items-center'>
