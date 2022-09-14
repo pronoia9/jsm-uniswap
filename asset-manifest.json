@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/jsm-uniswap/static/css/main.ef873c37.chunk.css",
+    "main.js": "/jsm-uniswap/static/js/main.be6a2418.chunk.js",
+    "main.js.map": "/jsm-uniswap/static/js/main.be6a2418.chunk.js.map",
+    "runtime-main.js": "/jsm-uniswap/static/js/runtime-main.6d8eb16c.js",
+    "runtime-main.js.map": "/jsm-uniswap/static/js/runtime-main.6d8eb16c.js.map",
+    "static/js/2.053dacab.chunk.js": "/jsm-uniswap/static/js/2.053dacab.chunk.js",
+    "static/js/2.053dacab.chunk.js.map": "/jsm-uniswap/static/js/2.053dacab.chunk.js.map",
+    "index.html": "/jsm-uniswap/index.html",
+    "static/css/main.ef873c37.chunk.css.map": "/jsm-uniswap/static/css/main.ef873c37.chunk.css.map",
+    "static/js/2.053dacab.chunk.js.LICENSE.txt": "/jsm-uniswap/static/js/2.053dacab.chunk.js.LICENSE.txt",
+    "static/media/chevron-down.371c0b7e.svg": "/jsm-uniswap/static/media/chevron-down.371c0b7e.svg",
+    "static/media/ethereumLogo.a1b9f99b.png": "/jsm-uniswap/static/media/ethereumLogo.a1b9f99b.png",
+    "static/media/uniswapLogo.b1166848.png": "/jsm-uniswap/static/media/uniswapLogo.b1166848.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.6d8eb16c.js",
+    "static/js/2.053dacab.chunk.js",
+    "static/css/main.ef873c37.chunk.css",
+    "static/js/main.be6a2418.chunk.js"
+  ]
+}
