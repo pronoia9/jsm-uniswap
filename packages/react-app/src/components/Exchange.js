@@ -49,11 +49,15 @@ const Exchange = ({ pools }) => {
         <button
           disabled={!'canSwap'}
           onClick={() => {}}
-          className={`${'canSwap' ? 'bg-site-pink text-white' : 'bg-site-dim2 text-site-dim2'} ${
-            styles.actionButton
-          }`}>
+          className={`${'canSwap' ? 'bg-site-pink text-white' : 'bg-site-dim2 text-site-dim2'} ${styles.actionButton}`}>
           {'isSwapping' ? 'Swapping...' : 'hasEnoughBalance'}
         </button>
+      )}
+
+      {'failureMessage' && '!resetState' ? (
+        <p className={styles.message}>failure</p>
+      ) : (
+        <p className={styles.message}>success</p>
       )}
     </div>
   );
