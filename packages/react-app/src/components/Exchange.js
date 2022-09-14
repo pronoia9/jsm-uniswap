@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Contract } from '@ethersproject/contracts';
 import { abis } from '@my-app/contracts';
@@ -60,14 +59,6 @@ const Exchange = ({ pools }) => {
 
   const successMessage = getSuccessMessage(swapApprovedState, swapExecuteState),
     failureMessage = getFailureMessage(swapApprovedState, swapExecuteState);
-
-  // console.log('ONE', { account, fromValue, fromToken, toToken, resetState });
-  // console.log('TWO', { fromValueBigNumber, availableTokens, counterpartTokens, pairAddress });
-  // console.log('THREE', { routerContract, fromTokenContract, fromTokenBalance, toTokenBalance, tokenAllowance, approveNeeded, formValueIsGreaterThan0, hasEnoughBalance, });
-  // console.log('FOUR', { swapApprovedState, swapApprovedSend });
-  // console.log('FIVE', { swapExecuteState, swapAExecuteSend });
-  // console.log('SIX', { isApproving, isSwapping, canApprove, canSwap });
-  // console.log('SEVEN', { successMessage, failureMessage });
 
   const onApproveRequested = () => {
     swapApprovedSend(ROUTER_ADDRESS, ethers.constants.MaxInt256);
