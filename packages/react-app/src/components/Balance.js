@@ -8,8 +8,13 @@ const Balance = ({ tokenBalance }) => {
   return (
     <div className={styles.balance}>
       <p className={styles.balanceText}>
-        {tokenBalance && (
-          <span className={styles.balanceBold}>Balance: {formatUnits(tokenBalance || parseUnits('0'))}</span>
+        {tokenBalance ? (
+          <>
+            <span className={styles.balanceBold}>Balance: </span>
+            {formatUnits(tokenBalance ?? parseUnits('0'))}
+          </>
+        ) : (
+          ''
         )}
       </p>
     </div>
