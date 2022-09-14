@@ -24,7 +24,7 @@ const Exchange = ({ pools }) => {
   const [toToken, setToToken] = useState('');
   const [resetState, setResetState] = useState(false);
 
-  const fromValueBigNumber = parseUnits(fromValue);
+  const fromValueBigNumber = parseUnits(fromValue || '0');
   const availableTokens = getAvailableTokens(pools);
   const counterpartTokens = getCounterpartTokens(pools, fromToken);
   const pairAddress = findPoolByTokens(pools, fromToken, toToken)?.address ?? '';
@@ -38,12 +38,12 @@ const Exchange = ({ pools }) => {
   const formValueIsGreaterThan0 = fromValueBigNumber.gt(parseUnits('0'));
   const hasEnoughBalance = fromValueBigNumber.lte(fromTokenBalance ?? parseUnits('0'));
 
-  const { state: swapApprovedState, send: swapApprovedSend } = useContractFunction(fromTokenContract, 'approve', {
+  const { state: swapApproveState, send: swapApproveSend } = useContractFunction(fromTokenContract, 'approve', {
     transactionName: 'onApproveRequested',
     gasLimitBufferPercentage: 10,
   });
 
-  const { state: swapExecuteState, send: swapAExecuteSend } = useContractFunction(
+  const { state: swapExecuteState, send: swapExecuteSend } = useContractFunction(
     routerContract,
     'swapExactTokensForTokens',
     {
@@ -52,21 +52,21 @@ const Exchange = ({ pools }) => {
     }
   );
 
-  const isApproving = isOperationPending(swapApprovedState),
+  const isApproving = isOperationPending(swapApproveState),
     isSwapping = isOperationPending(swapExecuteState);
   const canApprove = !isApproving && approvedNeeded,
     canSwap = !approvedNeeded && !isSwapping && formValueIsGreaterThan0 && hasEnoughBalance;
 
-  const successMessage = getSuccessMessage(swapApprovedState, swapExecuteState),
-    failureMessage = getFailureMessage(swapApprovedState, swapExecuteState);
+  const successMessage = getSuccessMessage(swapApproveState, swapExecuteState),
+    failureMessage = getFailureMessage(swapApproveState, swapExecuteState);
 
   const onApproveRequested = () => {
-    swapApprovedSend(ROUTER_ADDRESS, ethers.constants.MaxInt256);
+    swapApproveSend(ROUTER_ADDRESS, ethers.constants.MaxUint256);
   };
 
   const onSwapRequested = () => {
-    swapAExecuteSend(fromValueBigNumber, 0, [fromToken, toToken], account, Math.floor(Date.now() / 1000) + 60 * 2).then(
-      () => {
+    swapExecuteSend(fromValueBigNumber, 0, [fromToken, toToken], account, Math.floor(Date.now() / 1000) + 60 * 20).then(
+      (_) => {
         setFromValue('0');
       }
     );
@@ -74,12 +74,11 @@ const Exchange = ({ pools }) => {
 
   const onFromValueChange = (value) => {
     const trimmedValue = value.trim();
+
     try {
-      if (trimmedValue) parseUnits(value);
+      trimmedValue && parseUnits(value);
       setFromValue(value);
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (e) {}
   };
 
   const onFromTokenChange = (value) => {
